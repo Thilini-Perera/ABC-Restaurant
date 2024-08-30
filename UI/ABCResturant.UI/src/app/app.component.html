@@ -1,0 +1,109 @@
+<header>
+  <div class="px-3 py-2 text-bg-dark">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+          <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+        </a>
+
+        <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+          <li>
+            <a href="#" class="nav-link text-secondary">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"></use></svg>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="locations" class="nav-link text-secondary">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"></use></svg>
+              Locations
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Customer'">
+            <a href="askaQuestion" class="nav-link text-secondary">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#home"></use></svg>
+              Ask Us
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Admin'">
+            <a href="restuarants" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#speedometer2"></use></svg>
+              Restuarants
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Admin'">
+            <a href="users" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#table"></use></svg>
+              Users
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Admin'">
+            <a href="gallery" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#grid"></use></svg>
+              Gallery
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Admin'">
+            <a href="services" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Services
+            </a>
+          </li>
+          <li *ngIf="getUserRole() === 'Admin'">
+            <a href="offernpromotions" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Offers & Promotions
+            </a>
+          </li>
+          <li *ngIf="getUserRole() ==='Admin'|| getUserRole() ==='Staff'">
+            <a href="payments" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Payments
+            </a>
+          </li>
+          <li *ngIf="getUserRole() ==='Admin'|| getUserRole() ==='Staff'">
+            <a href="reservations" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Reservations
+            </a>
+          </li>
+          <li *ngIf="getUserRole() ==='Admin'|| getUserRole() ==='Staff'">
+            <a href="queries" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Queries
+            </a>
+          </li>
+
+          <li *ngIf="getCurrentUser()==null">
+            <a href="login" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Login
+            </a>
+          </li>
+          <li *ngIf="getCurrentUser()==null">
+            <a href="register" class="nav-link text-white">
+              <svg class="bi d-block mx-auto mb-1" width="24" height="24"><use xlink:href="#people-circle"></use></svg>
+              Register
+            </a>
+          </li>
+        </ul>
+
+        <div *ngIf="getCurrentUser()!=null" class="dropdown">
+          <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+            <strong>{{getCurrentUser().name}}</strong>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+            <li><a class="dropdown-item" (click)="signOut()">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<body style="background-image: url('/assets/images/WhatsApp Image 2024-08-12 at 14.12.13_d71b7bcd.jpg');">
+  <router-outlet></router-outlet>
+</body>
+

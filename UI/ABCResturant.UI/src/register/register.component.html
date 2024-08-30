@@ -1,0 +1,59 @@
+<div class="login-container">
+  <form class="login-form" style="text-align: center;" [formGroup]="formNew" (ngSubmit)="onSubmit()">
+    <h2>Register</h2>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput placeholder="Name" type="text" formControlName="name" required>
+        <mat-icon matSuffix>edit</mat-icon>
+        <mat-hint>Enter your name</mat-hint>
+        <div *ngIf="formNew.get('name')!.invalid && formNew.get('name')!.touched" class="text-danger">
+          Name is required and must be at least 5 characters long.
+        </div>
+      </mat-form-field>
+    </div>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Telephone</mat-label>
+        <input matInput placeholder="Telephone" type="text" formControlName="telephone" required>
+        <mat-icon matSuffix>phone</mat-icon>
+        <mat-hint>Enter your telephone</mat-hint>
+        <div *ngIf="formNew.get('telephone')!.invalid && formNew.get('telephone')!.touched" class="text-danger">
+          Telephone is required and must be a valid 10-digit number.
+        </div>
+      </mat-form-field>
+    </div>
+    <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput placeholder="Email" type="email" formControlName="email" required>
+      <mat-icon matSuffix>email</mat-icon>
+      <mat-hint>Enter your email</mat-hint>
+      <div *ngIf="formNew.get('email')!.invalid && formNew.get('email')!.touched" class="text-danger">
+        Email is required and must in correct format.
+      </div>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Password</mat-label>
+      <input matInput placeholder="Password" type="text" formControlName="password" required>
+      <mat-icon matSuffix>lock</mat-icon>
+      <mat-hint>Enter your password</mat-hint>
+      <div *ngIf="formNew.get('password')!.invalid && formNew.get('password')!.touched" class="text-danger">
+        Password is required and must be at least 6 characters long.
+      </div>
+    </mat-form-field>
+  </div>
+  <br>
+  <div class="example-button-container">
+    <button type="submit" mat-fab extended>
+      <mat-icon>signup</mat-icon>
+      Sign In
+    </button>
+  </div>
+
+  <p-toast />
+
+  </form>
+</div>

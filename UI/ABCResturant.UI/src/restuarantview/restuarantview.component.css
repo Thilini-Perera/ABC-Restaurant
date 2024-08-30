@@ -1,0 +1,10 @@
+.list-unstyled {
+    padding-left: 0;
+    list-style: none; /* Original styling that removes list numbers */
+  }
+  
+  ol.list-unstyled {
+    list-style: upper-roman; /* Override to display numbers */
+  }
+
+  

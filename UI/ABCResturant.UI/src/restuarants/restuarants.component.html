@@ -1,0 +1,505 @@
+<div class="container my-5 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+
+    <!-- Create Button Aligned Left -->
+    <button
+      mat-fab
+      extended
+      style="margin-right: 35vw;"
+      (click)="openForm('create')"
+    >
+      <mat-icon aria-hidden="false" fontIcon="add"></mat-icon>
+      Create
+    </button>
+
+    <!-- Full Report Button Aligned Right -->
+    <button
+      mat-fab
+      extended
+      style="margin-left: 35vw;"
+      (click)="GetFullReport()"
+    >
+      <mat-icon aria-hidden="false" fontIcon="picture_as_pdf"></mat-icon>
+      Full Report
+    </button>
+
+  </div>
+
+
+
+  <div class="table-responsive">
+    <p-table
+      #dt1
+      [value]="restuarants"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="5"
+      [globalFilterFields]="['name','location']"
+      [tableStyle]="{ 'max-width': '100%' }"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-gridlines"
+    >
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <mat-icon aria-hidden="false" fontIcon="search"></mat-icon>
+        <input
+            pInputText
+            type="text"
+            (input)="SetfilterGlobal($event)"
+            placeholder="Search keyword" />
+      </div>
+  </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="display: none">Id</th>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Telephone</th>
+          <th>CreatedOn</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-restuarant>
+        <tr>
+          <td style="display: none">{{ restuarant.id }}</td>
+          <td>{{ restuarant.name }}</td>
+          <td>{{ restuarant.location }}</td>
+          <td>{{ restuarant.telephone }}</td>
+          <td>{{ restuarant.createdOn }}</td>
+          <td style="text-align: center">
+
+            <div class="actions-column">
+            <button
+              mat-fab
+              color="success"
+              (click)="openForm('edit', restuarant)"
+            >
+              <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+            </button>
+
+            <button
+              mat-fab
+              color="failure"
+              (click)="deleteConfirm(restuarant.id)"
+            >
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="delete_forever"
+              ></mat-icon>
+            </button>
+
+            <button
+              mat-fab
+              (click)="openFormPic(restuarant)"
+            >
+              <mat-icon aria-hidden="false" fontIcon="cloud_upload"></mat-icon>
+            </button>
+
+            <button mat-fab (click)="GetRestuarnatReport(restuarant)">
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="picture_as_pdf"
+              ></mat-icon>
+            </button>
+
+
+            <button mat-fab (click)="GetRestuarnatReservationReport(restuarant)">
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="calendar_today"
+              ></mat-icon>
+            </button>
+
+
+            <button mat-fab (click)="ShowDetails(restuarant.id)">
+              <mat-icon aria-hidden="false" fontIcon="list_alt"></mat-icon>
+            </button>
+
+          </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+
+
+
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+  header="{{ formMode === 'create' ? 'Create Restaurant' : 'Edit Restaurant' }}"
+  [(visible)]="showForm"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form
+              [formGroup]="
+                formMode == 'edit' ? restaurantFormEdit : restaurantFormNew
+              "
+              (ngSubmit)="onSubmit()"
+            >
+              <input type="hidden" id="id" formControlName="id" />
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  formControlName="name"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? restaurantFormEdit.get('name')!.invalid &&
+                        restaurantFormEdit.get('name')!.touched
+                      : restaurantFormNew.get('name')!.invalid &&
+                        restaurantFormNew.get('name')!.touched
+                  "
+                  class="text-danger"
+                >
+                  Name is required and must be at least 5 characters long.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="location"
+                  formControlName="location"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? restaurantFormEdit.get('location')!.invalid &&
+                        restaurantFormEdit.get('location')!.touched
+                      : restaurantFormNew.get('location')!.invalid &&
+                        restaurantFormNew.get('location')!.touched
+                  "
+                  class="text-danger"
+                >
+                  Location is required and must be at least 5 characters long.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="maxReservations" class="form-label">Maximum Reservations</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="maxReservations"
+                  formControlName="maxReservations"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? restaurantFormEdit.get('maxReservations')!.invalid &&
+                        restaurantFormEdit.get('maxReservations')!.touched
+                      : restaurantFormNew.get('maxReservations')!.invalid &&
+                        restaurantFormNew.get('maxReservations')!.touched
+                  "
+                  class="text-danger"
+                >
+                Maximum Reservations is required and must be at least 1 should be available.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="currentRate" class="form-label">Rate for Reservations</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="currentRate"
+                  formControlName="currentRate"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? restaurantFormEdit.get('currentRate')!.invalid &&
+                        restaurantFormEdit.get('currentRate')!.touched
+                      : restaurantFormNew.get('currentRate')!.invalid &&
+                        restaurantFormNew.get('currentRate')!.touched
+                  "
+                  class="text-danger"
+                >
+                Rate is required.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="telephone" class="form-label">Telephone</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="telephone"
+                  formControlName="telephone"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? restaurantFormEdit.get('telephone')!.invalid &&
+                        restaurantFormEdit.get('telephone')!.touched
+                      : restaurantFormNew.get('telephone')!.invalid &&
+                        restaurantFormNew.get('telephone')!.touched
+                  "
+                  class="text-danger"
+                >
+                  Telephone is required and must be a valid 10-digit number.
+                </div>
+              </div>
+
+              <button type="submit" mat-fab extended style="margin-right: 50px">
+                {{ formMode === "create" ? "Create" : "Update" }}
+              </button>
+              <button
+                type="button"
+                mat-fab
+                extended
+                class="btn btn-secondary"
+                (click)="closeForm()"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="{{ selectedrestuarant==null? '':selectedrestuarant.name }}"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                [disabled]="true"
+                [value]="selectedrestuarant?.name || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="location" class="form-label">Location</label>
+              <input
+                type="text"
+                class="form-control"
+                id="location"
+                [disabled]="true"
+                [value]="selectedrestuarant?.location || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Telephone</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.telephone|| ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Services</label>
+              <ol type="I" *ngIf="selectedrestuarant?.services != null">
+                <li *ngFor="let item of selectedrestuarant.services">{{ item }}</li>
+              </ol>
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Current Rate For Reservations</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.currentRate|| 0"
+
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Maximum Reservations</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.maxReservations|| 0"
+
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Availble No.of Reservations</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="(selectedrestuarant?.maxReservations-selectedrestuarant?.currentReservations)|| 0"
+
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Total Porfit Generated</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="'Rs.'+selectedrestuarant?.totalAmountGenerated || 0"
+
+              />
+              <div class="mb-3">
+                <label for="telephone" class="form-label">Gallery</label>
+                <ul *ngIf="selectedrestuarant?.galleries!=null">
+                  <li *ngFor="let item of selectedrestuarant.galleries">
+                    <img [ngSrc]="'https://localhost:7072/'+item" width="100" alt="gallery" height="100" />
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+  <ng-template pTemplate="headless" let-message>
+    <div
+      class="flex flex-column align-items-center p-5 surface-overlay border-round"
+    >
+      <div class="icon-container">
+        <mat-icon fontIcon="error icon"></mat-icon>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-4">
+        {{ message.header }}
+      </span>
+      <p class="mb-0">{{ message.message }}</p>
+      <div class="section-table">
+        <div class="confirm-button-row">
+          <button
+            mat-flat-button
+            label="Save"
+            (click)="cd.accept()"
+            class="w-8rem"
+          >
+            Okay
+          </button>
+          <button
+            mat-stroked-button
+            label="Cancel"
+            (click)="cd.reject()"
+            class="p-button-outlined w-8rem"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+
+<p-dialog
+  header="Upload Pictures for Restuarant Gallery"
+  [(visible)]="showUpload"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form
+              [formGroup]="galleryForm"
+              (ngSubmit)="onSubmitPic(galleryForm.value)"
+            >
+              <input type="hidden" id="id" formControlName="restuarantId" />
+              <div class="mb-3">
+                <label for="formFile" class="form-label">Image</label>
+                <input
+                  class="form-control"
+                  type="file"
+                  id="formFile"
+                  formControlName="file"
+                  (change)="onFileChange($event)"
+                />
+                <div
+                  *ngIf="galleryForm.get('file')!.errors?.['required'] && galleryForm.get('file')!.touched"
+                  class="text-danger"
+                >
+                  File is required.
+                </div>
+                <div
+                  *ngIf="galleryForm.get('file')!.errors?.['invalidType'] && galleryForm.get('file')!.touched"
+                  class="text-danger"
+                >
+                  Only JPEG and PNG files are allowed.
+                </div>
+                <div
+                  *ngIf="galleryForm.get('file')!.errors?.['invalidSize'] && galleryForm.get('file')!.touched"
+                  class="text-danger"
+                >
+                  File size should not exceed 20 MB.
+                </div>
+              </div>
+              <button type="submit" mat-fab extended style="margin-right: 50px">
+                Upload
+              </button>
+              <button
+                type="button"
+                mat-fab
+                extended
+                class="btn btn-secondary"
+                (click)="closeFormPic()"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>

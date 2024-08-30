@@ -1,0 +1,325 @@
+<div class="container my-5 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+
+    <!-- Create Button Aligned Left -->
+    <button
+      mat-fab
+      extended
+      style="margin-right: 35vw;"
+      (click)="openForm('create')"
+    >
+      <mat-icon aria-hidden="false" fontIcon="add"></mat-icon>
+      Create
+    </button>
+
+    <!-- Full Report Button Aligned Right -->
+    <button
+      mat-fab
+      extended
+      style="margin-left: 35vw;"
+      (click)="GetFullReport()"
+    >
+      <mat-icon aria-hidden="false" fontIcon="picture_as_pdf"></mat-icon>
+      Full Report
+    </button>
+
+  </div>
+
+  <div class="table-responsive">
+    <p-table
+      [value]="reservations"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="5"
+      [tableStyle]="{ 'min-width': '80rem' }"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-gridlines"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="display: none;">Id</th>
+          <th>Reservation Name</th>
+          <th>Reservationd On</th>
+          <th>Type</th>
+          <th>User Name</th>
+          <th>Approval Pending</th>
+          <th>Created On</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-reservation>
+        <tr>
+          <td style="display: none;">{{ reservation.id }}</td>
+          <td>{{ reservation.name }}</td>
+          <td>{{ reservation.reservationOn }}</td>
+          <td>{{ reservation.reservationType == 1?"Dine In": "Delivery" }}</td>
+          <td>{{ reservation.userName }}</td>
+          <td><mat-checkbox [checked]="reservation.isApproved" disabled=""></mat-checkbox></td>
+          <td>{{ reservation.createdOn }}</td>
+          <td style="text-align: center">
+            <div class="actions-column">
+            <button mat-fab color="success" (click)="openForm('edit',reservation)">
+              <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+            </button>
+
+            <button *ngIf="!reservation.isApproved" mat-fab (click)="ApproveReservation(reservation.id)">
+              <mat-icon aria-hidden="false" fontIcon="check"></mat-icon>
+            </button>
+
+            <button mat-fab color="failure" (click)="deleteConfirm(reservation.id)">
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="delete_forever"
+              ></mat-icon>
+            </button>
+            <button mat-fab (click)="ShowDetails(reservation.id)">
+              <mat-icon aria-hidden="false" fontIcon="list_alt"></mat-icon>
+            </button>
+          </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+    header="{{ formMode === 'create' ? 'Create Reservation' : 'Edit Reservation' }}"
+    [(visible)]="showForm"
+    [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '50vw'}"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="popup-form container my-10">
+      <div  id="restaurantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form [formGroup]="formMode=='edit'? formEdit:formNew" (ngSubmit)="onSubmit()">
+                <input type="hidden" id="id" formControlName="id">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="text"  class="form-control" id="name" formControlName="name">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('name')!.invalid && formEdit.get('name')!.touched : formNew.get('name')!.invalid && formNew.get('name')!.touched" class="text-danger">
+                    Name is required and must be at least 5 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="name" class="form-label">Reservation Date</label><br>
+                  <p-calendar inputId="calendar-12h"
+                    [showTime]="true"
+                    [touchUI]="true"
+                    [minDate]="minDate"
+                    dateFormat="yy/mm/dd"
+                    [showButtonBar]="true"
+                    formControlName="reservationOn" />
+                    <div *ngIf="formMode === 'edit' ? formEdit.get('reservationOn')!.invalid && formEdit.get('reservationOn')!.touched : formNew.get('reservationOn')!.invalid && formNew.get('reservationOn')!.touched" class="text-danger">
+                      Reservation Date is required.
+                    </div>
+                </div>
+
+                <div class="mb-3" *ngIf="formMode=='create'">
+                  <label for="location" class="form-label" >Customer</label>
+                  <select select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" formControlName="userId">
+                    <option disabled selected>Select a Customer</option>
+                    <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+                  </select>
+                  <div *ngIf="formNew.get('userId')!.invalid && formNew.get('userId')!.touched" class="text-danger">
+                    Customer is required.
+                  </div>
+                </div>
+                <div class="mb-3" *ngIf="formMode=='create'">
+                  <label for="location" class="form-label">Reservation Type</label>
+                  <select (change)="updateselection($event)" select class="form-select form-select-lg mb-3" [(ngModel)]="selectedType" aria-label=".form-select-lg example" formControlName="reservationType">
+                    <option disabled selected>Select a Type</option>
+                    <option *ngFor="let rtype of reservationTypes " [value]="rtype.valueOf()">{{ rtype }}</option>
+                  </select>
+                  <div *ngIf="formNew.get('reservationType')!.invalid && formNew.get('reservationType')!.touched" class="text-danger">
+                    Reservation Type is required.
+                  </div>
+                </div>
+                <div class="mb-3" *ngIf="formMode=='create'">
+                  <label for="location" class="form-label">Restuarant</label>
+                  <select (change)="CheckAvailabilty($event)" select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" formControlName="restuarantId">
+                    <option disabled selected>Select a Restuarant</option>
+                    <option *ngFor="let resturant of restaurants" [value]="resturant.id" >{{ resturant.name }}</option>
+                  </select>
+                  <div *ngIf="formNew.get('restuarantId')!.invalid && formNew.get('restuarantId')!.touched" class="text-danger">
+                    Restuarant is required.
+                  </div>
+                  <p *ngIf="shouldAllowReservation === false" class="text-danger">
+                    No availability for this reservation.
+                  </p>
+                </div>
+
+                <div class="mb-3">
+                  <label for="location" class="form-label">Number Of People</label>
+                  <input type="number" class="form-control" id="location" formControlName="numberOfPeople" (input)="updatePrice($event)">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('numberOfPeople')!.invalid && formEdit.get('numberOfPeople')!.touched : formNew.get('numberOfPeople')!.invalid && formNew.get('numberOfPeople')!.touched" class="text-danger">
+                    Number Of People is required.
+                  </div>
+                </div>
+                <div class="mb-3"  *ngIf="formMode=='create'">
+                  <label for="name" class="form-label">Amount to Pay :<b> Rs.{{totalPay}}</b></label>
+                </div>
+                <button type="submit" mat-fab extended style="margin-right: 50px" [disabled]="!shouldAllowReservation">
+                  {{ formMode === 'create' ? 'Create' : 'Update' }}
+                </button>
+                <button type="button" mat-fab extended class="btn btn-secondary" (click)="closeForm()">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</p-dialog>
+
+<p-dialog
+  header="{{ selectedrestuarant==null? '':selectedrestuarant.name }}"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                [disabled]="true"
+                [value]="selectedrestuarant?.name || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="location" class="form-label">Restuarant Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="location"
+                [disabled]="true"
+                [value]="selectedrestuarant?.restuarantName || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Number Of People</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.numberOfPeople|| ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Reservation On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.reservationOn|| ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Type</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.reservationType == 1 ? 'Dine In' : 'Delivery' || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Is Approved</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.isApproved || 'Not Approved'"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Reserved Customer</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.userName|| ''"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Created On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.createdOn || ''"
+              />
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+    <ng-template pTemplate="headless" let-message>
+        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+          <div class="icon-container">
+            <mat-icon fontIcon="error icon"></mat-icon>
+          </div>
+
+            <span class="font-bold text-2xl block mb-2 mt-4">
+                {{ message.header }}
+            </span>
+            <p class="mb-0">{{ message.message }}</p>
+            <div class="section-table">
+              <div class="confirm-button-row">
+                <button
+                mat-flat-button
+                    label="Save"
+                    (click)="cd.accept()"
+                    class="w-8rem">
+                    Okay
+                </button>
+                <button
+                mat-stroked-button
+                    label="Cancel"
+                    (click)="cd.reject()"
+                    class="p-button-outlined w-8rem ">
+                    Cancel
+                </button>
+              </div>
+            </div>
+
+        </div>
+    </ng-template>
+</p-confirmDialog>

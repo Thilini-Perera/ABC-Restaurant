@@ -1,0 +1,30 @@
+<div class="login-container">
+    <form class="login-form" style="text-align: center;" [formGroup]="formNew" (ngSubmit)="onSubmit()">
+      <h2>Ask a Question</h2>
+      <input type="hidden" id="id" formControlName="userId">
+      <div>
+        <mat-form-field appearance="fill">
+          <mat-label>Query</mat-label>
+          <textarea matInput id="query" formControlName="response" required>
+
+          </textarea>
+          <!-- <input matInput placeholder="Name" type="text" formControlName="response" required> -->
+          <mat-icon matSuffix>message</mat-icon>
+          <mat-hint>Enter your question</mat-hint>
+          <div *ngIf="formNew.get('response')!.invalid && formNew.get('response')!.touched" class="text-danger">
+            Response is required.
+          </div>
+        </mat-form-field>
+      </div>
+
+    <br>
+    <div class="example-button-container">
+      <button type="submit" mat-fab extended>
+        <mat-icon>create</mat-icon>
+        Submit
+      </button>
+    </div>
+    </form>
+  </div>
+
+  <p-toast />

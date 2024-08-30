@@ -1,0 +1,23 @@
+<div class="container marketing" style="margin-top: 5%">
+  <!-- Three columns of text below the carousel -->
+
+  <div
+    class="row"
+    *ngFor="let restuarant of restuarants | slice : 0 : restuarants.length / restuarants.length"
+  >
+    <div class="col-lg-4" *ngFor="let restuarant of restuarants">
+      <h2>{{restuarant.name}}</h2>
+      <p>
+        {{restuarant.location}}
+      </p>
+      <p><a class="btn btn-secondary" [routerLink]="['/restuarant',restuarant.id]" routerLinkActive="router-link-active"  routerLinkActive="router-link-active">View details »</a></p>
+    </div>
+    <!-- /.col-lg-4 -->
+  </div>
+  <!-- /.row -->
+
+  <!-- START THE FEATURETTES -->
+
+  <hr class="featurette-divider" />
+
+</div>

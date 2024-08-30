@@ -1,0 +1,176 @@
+<div class="container my-5 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+
+    <!-- Create Button Aligned Left -->
+    <button
+      mat-fab
+      extended
+      style="margin-right: 35vw;"
+      (click)="openForm('create')"
+    >
+      <mat-icon aria-hidden="false" fontIcon="add"></mat-icon>
+      Create
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <p-table
+    #dt1
+      [value]="offerNPromotions"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="5"
+      [globalFilterFields]="['message','code','discount']"
+      [tableStyle]="{ 'min-width': '80rem' }"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-gridlines"
+    >
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <mat-icon aria-hidden="false" fontIcon="search"></mat-icon>
+        <input
+            pInputText
+            type="text"
+            (input)="SetfilterGlobal($event)"
+            placeholder="Search keyword" />
+      </div>
+  </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="display: none;">Id</th>
+          <th>Message</th>
+          <th>Code</th>
+          <th>Discount</th>
+          <th>CreatedOn</th>
+          <th>Offer Until</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-offerNPromotion>
+        <tr>
+          <td style="display: none;">{{ offerNPromotion.id }}</td>
+          <td>{{ offerNPromotion.message }}</td>
+          <td>{{ offerNPromotion.code }}</td>
+          <td>{{ offerNPromotion.discount }}</td>
+          <td>{{ offerNPromotion.createdOn }}</td>
+          <td>{{ offerNPromotion.offerUntil }}</td>
+          <td style="text-align: center">
+            <div class="actions-column">
+            <button mat-fab color="success" (click)="openForm('edit',offerNPromotion)">
+              <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+            </button>
+
+            <button mat-fab color="failure" (click)="deleteConfirm(offerNPromotion.id)">
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="delete_forever"
+              ></mat-icon>
+            </button>
+          </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+    header="{{ formMode === 'create' ? 'Create Offer/Promotion' : 'Edit Offer/Promotion' }}"
+    [(visible)]="showForm"
+    [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '50vw' }"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="popup-form container my-10">
+      <div  id="restaurantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form [formGroup]="formMode=='edit'? formEdit:formNew" (ngSubmit)="onSubmit()">
+                <input type="hidden" id="id" formControlName="id">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Message</label>
+                  <input type="text"  class="form-control" id="name" formControlName="message">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('message')!.invalid && formEdit.get('message')!.touched : formNew.get('message')!.invalid && formNew.get('message')!.touched" class="text-danger">
+                    Message is required and must be at least 10 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Code</label>
+                  <input type="text" class="form-control" id="location" formControlName="code">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('code')!.invalid && formEdit.get('code')!.touched : formNew.get('code')!.invalid && formNew.get('code')!.touched" class="text-danger">
+                    Code is required and must be at least 6 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Discount</label>
+                  <input type="number" class="form-control" id="location" formControlName="discount">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('discount')!.invalid && formEdit.get('discount')!.touched : formNew.get('discount')!.invalid && formNew.get('discount')!.touched" class="text-danger">
+                    Discount is required and must be less than 45%.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Offer Until</label><br>
+                <p-calendar inputId="calendar-12h"
+                  [showTime]="true"
+                  [minDate]="minDate"
+                  [touchUI]="true"
+                  dateFormat="yy/mm/dd"
+                  [showButtonBar]="true"
+                  formControlName="offerUntil" />
+                </div>
+                <div *ngIf="formMode === 'edit' ? formEdit.get('offerUntil')!.invalid && formEdit.get('offerUntil')!.touched : formNew.get('offerUntil')!.invalid && formNew.get('offerUntil')!.touched" class="text-danger">
+                  Offer Until is required
+                </div>
+
+                <button type="submit" mat-fab extended style="margin-right: 50px">
+                  {{ formMode === 'create' ? 'Create' : 'Update' }}
+                </button>
+                <button type="button" mat-fab extended class="btn btn-secondary" (click)="closeForm()">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</p-dialog>
+
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+    <ng-template pTemplate="headless" let-message>
+        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+          <div class="icon-container">
+            <mat-icon fontIcon="error icon"></mat-icon>
+          </div>
+            <span class="font-bold text-2xl block mb-2 mt-4">
+                {{ message.header }}
+            </span>
+            <p class="mb-0">{{ message.message }}</p>
+            <div class="section-table">
+              <div class="confirm-button-row">
+                <button
+                mat-flat-button
+                    label="Save"
+                    (click)="cd.accept()"
+                    class="w-8rem">
+                    Okay
+                </button>
+                <button
+                mat-stroked-button
+                    label="Cancel"
+                    (click)="cd.reject()"
+                    class="p-button-outlined w-8rem ">
+                    Cancel
+                </button>
+              </div>
+            </div>
+
+        </div>
+    </ng-template>
+</p-confirmDialog>

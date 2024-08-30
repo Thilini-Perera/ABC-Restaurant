@@ -1,0 +1,307 @@
+<div class="container my-6 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+
+    <!-- Create Button Aligned Left -->
+    <button
+      mat-fab
+      extended
+      style="margin-right: 35vw;"
+      (click)="openForm('create')"
+    >
+      <mat-icon aria-hidden="false" fontIcon="add"></mat-icon>
+      Create
+    </button>
+  </div>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-18">
+        <div class="table-responsive">
+          <p-table
+            #dt1
+            [value]="users"
+            [loading]="loading"
+            [paginator]="true"
+            [rows]="5"
+            [globalFilterFields]="['name','role']"
+            [tableStyle]="{ 'max-width': '100%' }"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            styleClass="p-datatable-gridlines"
+          >
+          <ng-template pTemplate="caption">
+            <div class="flex">
+              <mat-icon aria-hidden="false" fontIcon="search"></mat-icon>
+              <input
+                  pInputText
+                  type="text"
+                  (input)="SetfilterGlobal($event)"
+                  placeholder="Search keyword" />
+            </div>
+        </ng-template>
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="display: none;">Id</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Telephone</th>
+                <th>CreatedOn</th>
+                <th>UpdatedOn</th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+              <tr>
+                <td style="display: none;">{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.role }}</td>
+                <td>{{ user.telephone }}</td>
+                <td>{{ user.createdOn }}</td>
+                <td>{{ user.updatedOn }}</td>
+                <td style="text-align: center;" >
+
+                  <div class="actions-column-custom">
+
+                    <button mat-mini-fab color="success" (click)="openForm('edit',user)">
+                      <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+                    </button>
+
+                    <button mat-mini-fab color="failure" (click)="deleteConfirm(user.id)">
+                      <mat-icon
+                        aria-hidden="false"
+                        fontIcon="delete_forever"
+                      ></mat-icon>
+                    </button>
+
+                    <button mat-mini-fab (click)="GetUserActivityReport(user)">
+                      <mat-icon
+                        aria-hidden="false"
+                        fontIcon="picture_as_pdf"
+                      ></mat-icon>
+                    </button>
+                    <button mat-mini-fab (click)="ShowDetails(user.id)">
+                      <mat-icon aria-hidden="false" fontIcon="list_alt"></mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+    header="{{ formMode === 'create' ? 'Create User' : 'Edit User' }}"
+    [(visible)]="showForm"
+    [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '50vw' }"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="popup-form container my-10">
+      <div  id="restaurantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form [formGroup]="formMode=='edit'? formEdit:formNew" (ngSubmit)="onSubmit()">
+                <input type="hidden" id="id" formControlName="id">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="text"  class="form-control" id="name" formControlName="name">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('name')!.invalid && formEdit.get('name')!.touched : formNew.get('name')!.invalid && formNew.get('name')!.touched" class="text-danger">
+                    Name is required and must be at least 5 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="location" formControlName="email">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('email')!.invalid && formEdit.get('email')!.touched : formNew.get('email')!.invalid && formNew.get('email')!.touched" class="text-danger">
+                    Email is required and must in correct format.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Password</label>
+                  <input type="text" class="form-control" id="location" formControlName="password">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('password')!.invalid && formEdit.get('password')!.touched : formNew.get('password')!.invalid && formNew.get('password')!.touched" class="text-danger">
+                    Password is required and must be at least 6 characters long.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="location" class="form-label">Role</label>
+                  <select select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" formControlName="role">
+                    <option disabled selected>Select a Role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Customer">Customer</option>
+                  </select>
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('role')!.invalid && formEdit.get('role')!.touched : formNew.get('role')!.invalid && formNew.get('role')!.touched" class="text-danger">
+                    Role is required and must be selected.
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="telephone" class="form-label">Telephone</label>
+                  <input type="text" class="form-control" id="telephone" formControlName="telephone">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('telephone')!.invalid && formEdit.get('telephone')!.touched : formNew.get('telephone')!.invalid && formNew.get('telephone')!.touched" class="text-danger">
+                    Telephone is required and must be a valid 10-digit number.
+                  </div>
+                </div>
+
+                <button type="submit" mat-fab extended style="margin-right: 50px">
+                  {{ formMode === 'create' ? 'Create' : 'Update' }}
+                </button>
+                <button type="button" mat-fab extended class="btn btn-secondary" (click)="closeForm()">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</p-dialog>
+
+
+<p-dialog
+  header="{{ selectedrestuarant==null? '':selectedrestuarant.name }}"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                [disabled]="true"
+                [value]="selectedrestuarant?.name || ''"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Email</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.email || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Password</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.password|| ''"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Role</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.role || ''"
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Telephone</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.telephone || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Created On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.createdOn || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Updated On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedrestuarant?.updatedOn || ''"
+              />
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+    <ng-template pTemplate="headless" let-message>
+        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+          <div class="icon-container">
+            <mat-icon fontIcon="error icon"></mat-icon>
+          </div>
+            <span class="font-bold text-2xl block mb-2 mt-4">
+                {{ message.header }}
+            </span>
+            <p class="mb-0">{{ message.message }}</p>
+            <div class="section-table">
+              <div class="confirm-button-row">
+                <button
+                mat-flat-button
+                    label="Save"
+                    (click)="cd.accept()"
+                    class="w-8rem">
+                    Okay
+                </button>
+                <button
+                mat-stroked-button
+                    label="Cancel"
+                    (click)="cd.reject()"
+                    class="p-button-outlined w-8rem ">
+                    Cancel
+                </button>
+              </div>
+            </div>
+
+        </div>
+    </ng-template>
+</p-confirmDialog>

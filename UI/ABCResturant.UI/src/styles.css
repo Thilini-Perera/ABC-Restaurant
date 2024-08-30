@@ -1,0 +1,33 @@
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+.icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;  /* Adjust the width as needed */
+    height: 50px; /* Adjust the height as needed */
+    border: 2px solid black; /* Adjust the border color as needed */
+    border-radius: 50%;
+    /* background-color: #3c3cdb; */
+    margin-left: 5vw;
+    margin-bottom: 2vh;
+  }
+
+  .icon-container mat-icon {
+    font-size: 24px;  /* Adjust the icon size as needed */
+  }
+
+
+  .actions-column {
+    display: flex;
+    gap: 10px; /* Adjust gap as needed */
+    flex-wrap: nowrap;
+  }
+
+  .actions-column button {
+    white-space: nowrap;
+  }

@@ -1,0 +1,48 @@
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+
+
+.mat-success {
+  background-color: rgb(61, 167, 61);
+  color: #fff;
+}
+
+
+.mat-failure {
+  background-color: rgb(255, 0, 0);
+  color: #fff;
+}
+
+.surface-overlay {
+  background-color: white;
+}
+
+.confirm-button-row {
+  display: table-cell;
+}
+
+.section-table{
+  display: table;
+}
+
+.confirm-button-row .mat-mdc-button-base {
+  margin: 8px 8px 8px 0;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;  /* Adjust the width as needed */
+  height: 50px; /* Adjust the height as needed */
+  border: 2px solid black; /* Adjust the border color as needed */
+  border-radius: 50%;
+  /* background-color: #3c3cdb; */
+  margin-left: 5vw;
+  margin-bottom: 2vh;
+}
+
+.icon-container mat-icon {
+  font-size: 24px;  /* Adjust the icon size as needed */
+}

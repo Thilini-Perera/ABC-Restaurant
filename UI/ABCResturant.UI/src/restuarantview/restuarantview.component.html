@@ -1,0 +1,135 @@
+<section class="py-5 text-center container">
+  <div class="row py-lg-5">
+    <div class="col-lg-6 col-md-8 mx-auto">
+      <h1 class="fw-light">Welcome to {{ restuarant.name }}</h1>
+      <p class="lead text-muted">{{ restuarant.location.toUpperCase() }}</p>
+      <p class="lead text-muted">Reservation Rate is {{ restuarant.currentRate }} per person</p>
+      <div *ngIf="getCurrentUser() == null">
+        <p>Please Login to make a Reservation or register if you are New</p>
+        <p>
+          <a href="register" class="btn btn-primary my-2" style="margin-right: 10px">Register</a>
+          <a href="login" class="btn btn-primary my-2">Login</a>
+        </p>
+      </div>
+      <div *ngIf="getCurrentUser() != null">
+        <p>
+          <button class="btn btn-primary my-2" (click)="openForm()" *ngIf="shouldAllowReservation">
+            Make Reservation
+          </button>
+        </p>
+        <p style="font-weight: 600;" *ngIf="!shouldAllowReservation">
+          There are no Reservations available at this Resturant
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="carouselExample" class="carousel slide">
+  <div class="carousel-inner">
+    <div *ngFor="let picture of restuarant.galleries; let i = index"
+      [ngClass]="{ 'carousel-item': true, active: i === 0 }">
+      <img [ngSrc]="'https://localhost:7072/' + picture" class="d-block w-100" alt="Picture {{ i + 1 }}" width="100"
+        height="500" />
+    </div>
+    <div class="carousel-item active" *ngIf="restuarant.galleries.length === 0">
+      <img src="{{ dummyPicture }}" class="d-block w-100" alt="..." />
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+
+<div class="col-md-6" style="margin-left: 2vw;margin-top: 2vh;">
+  <h2 class="text-body-emphasis">Service offered by the Restuarant</h2>
+  <p>We go above and beyond for you.</p>
+  <!-- Search Input -->
+  <input type="text" [(ngModel)]="searchTerm" placeholder="Search services..." class="form-control" />
+
+  <!-- Filtered List -->
+  <ol class="list-unstyled ps-0">
+    <li *ngFor="let service of filteredServices()">{{ service.name }}</li>
+  </ol>
+</div>
+
+<p-toast />
+<!-- This is the create|Edit dialog -->
+<p-dialog header="Make a Reservation" [(visible)]="showForm" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <div class="popup-form container my-10">
+    <div id="restaurantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form [formGroup]="formNew" (ngSubmit)="onSubmit()">
+              <input type="hidden" id="id" formControlName="userId" />
+              <input type="hidden" id="id" formControlName="restuarantId" />
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" formControlName="name" />
+                <div *ngIf="formNew.get('name')!.invalid && formNew.get('name')!.touched" class="text-danger">
+                  Name is required and must be at least 5 characters long.
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="name" class="form-label">Reservation Date</label><br>
+                <p-calendar inputId="calendar-12h"
+                  [showTime]="true"
+                  [minDate]="minDate"
+                  [touchUI]="true"
+                  dateFormat="yy/mm/dd"
+                  [showButtonBar]="true"
+                  formControlName="reservationdOn" />
+                  <div *ngIf="formNew.get('reservationdOn')!.invalid && formNew.get('reservationdOn')!.touched" class="text-danger">
+                    Reservation Date is required.
+                  </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="location" class="form-label">Reservation Type</label>
+                <select (change)="updateselection($event)" select class="form-select form-select-lg mb-3" [(ngModel)]="selectedType" aria-label=".form-select-lg example" formControlName="reservationType">
+                  <option disabled selected>Select a Type</option>
+                  <option *ngFor="let rtype of reservationTypes " [value]="rtype.valueOf()">{{ rtype }}</option>
+                </select>
+                <div *ngIf="formNew.get('reservationType')!.invalid && formNew.get('reservationType')!.touched" class="text-danger">
+                  Reservation Type is required.
+                </div>
+              </div>
+
+              <div class="mb-3" >
+                <label for="name" class="form-label">Number of People Attending</label>
+                <input type="number" class="form-control" id="name" formControlName="numberOfPeople" (input)="updatePrice($event)"/>
+                <div *ngIf="formNew.get('numberOfPeople')!.invalid && formNew.get('numberOfPeople')!.touched" class="text-danger">
+                  Number Of People is required.
+                </div>
+              </div>
+
+              <div class="mb-3" >
+                <label for="name" class="form-label">Offer/Promo Code</label>
+                <input type="text" class="form-control" id="offerpromo" (input)="CheckDiscount($event)"/>
+              </div>
+
+              <div class="mb-3" >
+                <label for="name" class="form-label">Amount to Pay : Rs.{{totalPay}}</label>
+              </div>
+
+
+              <button type="submit" mat-fab extended style="margin-right: 50px"> Pay </button>
+              <button type="button" mat-fab extended class="btn btn-secondary" (click)="closeForm()">
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>

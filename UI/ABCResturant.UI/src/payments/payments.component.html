@@ -1,0 +1,252 @@
+<div class="container my-5 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+
+    <!-- Create Button Aligned Left -->
+    <button
+      mat-fab
+      extended
+      style="margin-right: 35vw;"
+      (click)="openForm('create')"
+    >
+      <mat-icon aria-hidden="false" fontIcon="add"></mat-icon>
+      Create
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <p-table
+      #dt1
+      [value]="payments"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="5"
+      [tableStyle]="{ 'min-width': '80rem' }"
+      [globalFilterFields]="['total']"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-gridlines"
+    >
+    <ng-template pTemplate="caption">
+      <div class="flex">
+        <mat-icon aria-hidden="false" fontIcon="search"></mat-icon>
+        <input
+            pInputText
+            type="text"
+            (input)="SetfilterGlobal($event)"
+            placeholder="Search keyword" />
+      </div>
+  </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="display: none;">Id</th>
+          <th>Total</th>
+          <th>Paid Customer</th>
+          <th>CreatedOn</th>
+          <th>UpdatedOn</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-payment>
+        <tr>
+          <td style="display: none;">{{ payment.id }}</td>
+          <td>Rs.{{ payment.total }}</td>
+          <td>{{ payment.user.name }}</td>
+          <td>{{ payment.createdOn }}</td>
+          <td>{{ payment.updatedOn }}</td>
+          <td style="text-align: center">
+            <div class="actions-column">
+            <!-- <button mat-fab color="success" (click)="openForm('edit',payment)">
+              <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+            </button> -->
+            <button mat-fab (click)="ShowDetails(payment.id)">
+              <mat-icon aria-hidden="false" fontIcon="list_alt"></mat-icon>
+            </button>
+
+            <button mat-fab color="failure" (click)="deleteConfirm(payment.id)">
+              <mat-icon
+                aria-hidden="false"
+                fontIcon="delete_forever"
+              ></mat-icon>
+            </button>
+          </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+    header="{{ formMode === 'create' ? 'Create Payment' : 'Edit Payment' }}"
+    [(visible)]="showForm"
+    [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+    [style]="{ width: '50vw' }"
+    [draggable]="false"
+    [resizable]="false">
+    <div class="popup-form container my-10">
+      <div  id="restaurantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              <form [formGroup]="formMode=='edit'? formEdit:formNew" (ngSubmit)="onSubmit()">
+                <input type="hidden" id="id" formControlName="id">
+
+                <div class="mb-3">
+                  <label for="location" class="form-label">Restuarant</label>
+                  <select select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" formControlName="restuarantId">
+                    <option disabled selected>Select a Restuarant</option>
+                    <option *ngFor="let resturant of restuarants" [value]="resturant.id">{{ resturant.name }}</option>
+                  </select>
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('restuarantId')!.invalid && formEdit.get('restuarantId')!.touched : formNew.get('restuarantId')!.invalid && formNew.get('restuarantId')!.touched" class="text-danger">
+                    Restuarant required to be selected.
+                  </div>
+                </div>
+
+
+                <div class="mb-3">
+                  <label for="name" class="form-label">Payment</label>
+                  <input type="number"  class="form-control" id="name" formControlName="total">
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('total')!.invalid && formEdit.get('total')!.touched : formNew.get('total')!.invalid && formNew.get('total')!.touched" class="text-danger">
+                    Payment required.
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="location" class="form-label">Customer</label>
+                  <select select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" formControlName="userId">
+                    <option disabled selected>Select a Customer</option>
+                    <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+                  </select>
+                  <div *ngIf="formMode === 'edit' ? formEdit.get('userId')!.invalid && formEdit.get('userId')!.touched : formNew.get('userId')!.invalid && formNew.get('userId')!.touched" class="text-danger">
+                    Customer required to be selected.
+                  </div>
+                </div>
+
+
+
+                <button type="submit" mat-fab extended style="margin-right: 50px">
+                  {{ formMode === 'create' ? 'Create' : 'Update' }}
+                </button>
+                <button type="button" mat-fab extended class="btn btn-secondary" (click)="closeForm()">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</p-dialog>
+
+
+<p-dialog
+  header="{{ selectedPayment==null? '':'Payment details' }}"
+  [(visible)]="showDetail"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="name" class="form-label">Total</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                [disabled]="true"
+                [value]="selectedPayment?.total || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="name" class="form-label">Restuarant</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                [disabled]="true"
+                [value]="selectedPayment?.restaurantName|| ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="location" class="form-label">Paid Customer</label>
+              <input
+                type="text"
+                class="form-control"
+                id="location"
+                [disabled]="true"
+                [value]="selectedPayment?.userName || ''"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Created On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedPayment?.createdOn"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="telephone" class="form-label">Updated On</label>
+              <input
+                type="text"
+                class="form-control"
+                id="telephone"
+                [disabled]="true"
+                [value]="selectedPayment?.updatedOn"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+    <ng-template pTemplate="headless" let-message>
+        <div class="flex flex-column align-items-center p-5 surface-overlay border-round">
+          <div class="icon-container">
+            <mat-icon fontIcon="error icon"></mat-icon>
+          </div>
+            <span class="font-bold text-2xl block mb-2 mt-4">
+                {{ message.header }}
+            </span>
+            <p class="mb-0">{{ message.message }}</p>
+            <div class="section-table">
+              <div class="confirm-button-row">
+                <button
+                mat-flat-button
+                    label="Save"
+                    (click)="cd.accept()"
+                    class="w-8rem">
+                    Okay
+                </button>
+                <button
+                mat-stroked-button
+                    label="Cancel"
+                    (click)="cd.reject()"
+                    class="p-button-outlined w-8rem ">
+                    Cancel
+                </button>
+              </div>
+            </div>
+
+        </div>
+    </ng-template>
+</p-confirmDialog>

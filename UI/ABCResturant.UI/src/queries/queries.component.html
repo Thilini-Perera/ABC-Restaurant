@@ -1,0 +1,182 @@
+<div class="container my-5 text-center">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 50px;">
+    <!-- Full Report Button Aligned Right -->
+    <button
+      mat-fab
+      extended
+      style="margin-left: 78vw;"
+      (click)="GetFullReport()"
+    >
+      <mat-icon aria-hidden="false" fontIcon="picture_as_pdf"></mat-icon>
+      Full Report
+    </button>
+
+  </div>
+
+
+  <div class="table-responsive">
+    <p-table
+      [value]="queries"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="5"
+      [tableStyle]="{ 'min-width': '80rem' }"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      styleClass="p-datatable-gridlines"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="display: none">Id</th>
+          <th>CreatedOn</th>
+          <th>UpdatedOn</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-query>
+        <tr>
+          <td style="display: none">{{ query.id }}</td>
+          <td>{{ query.createdOn }}</td>
+          <td>{{ query.updatedOn }}</td>
+          <td style="text-align: center">
+            <div class="actions-column">
+              <button mat-fab color="success" (click)="openForm('edit', query)">
+                <mat-icon aria-hidden="false" fontIcon="edit"></mat-icon>
+              </button>
+
+              <button mat-fab color="failure" (click)="deleteConfirm(query.id)">
+                <mat-icon
+                  aria-hidden="false"
+                  fontIcon="delete_forever"
+                ></mat-icon>
+              </button>
+
+              <button mat-fab (click)="GetQueryReport(query)">
+                <mat-icon
+                  aria-hidden="false"
+                  fontIcon="picture_as_pdf"
+                ></mat-icon>
+              </button>
+
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- This is the create|Edit dialog -->
+<p-dialog
+  header="{{ formMode === 'create' ? 'Create Query' : 'Edit Query' }}"
+  [(visible)]="showForm"
+  [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="popup-form container my-10">
+    <div
+      id="restaurantModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <form
+              [formGroup]="formMode == 'edit' ? formEdit : formNew"
+              (ngSubmit)="onSubmit()"
+            >
+              <input type="hidden" id="id" formControlName="id" />
+              <input type="hidden" id="id" formControlName="userId" />
+
+              <div class="card-body">
+                <h5 class="card-title">Chat</h5>
+                <div *ngFor="let message of messages">
+                  <div class="message">
+                    <p class="message-content">{{ message.response }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Message</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  formControlName="response"
+                />
+                <div
+                  *ngIf="
+                    formMode === 'edit'
+                      ? formEdit.get('response')!.invalid &&
+                        formEdit.get('response')!.touched
+                      : formNew.get('response')!.invalid &&
+                        formNew.get('response')!.touched
+                  "
+                  class="text-danger"
+                >
+                  A Reply is required.
+                </div>
+              </div>
+
+              <button type="submit" mat-fab extended style="margin-right: 50px">
+                Submit
+              </button>
+              <button
+                type="button"
+                mat-fab
+                extended
+                class="btn btn-secondary"
+                (click)="closeForm()"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- This is delete confirmation -->
+<p-toast />
+<p-confirmDialog #cd>
+  <ng-template pTemplate="headless" let-message>
+    <div
+      class="flex flex-column align-items-center p-5 surface-overlay border-round"
+    >
+      <div class="icon-container">
+        <mat-icon fontIcon="error icon"></mat-icon>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-4">
+        {{ message.header }}
+      </span>
+      <p class="mb-0">{{ message.message }}</p>
+      <div class="section-table">
+        <div class="confirm-button-row">
+          <button
+            mat-flat-button
+            label="Save"
+            (click)="cd.accept()"
+            class="w-8rem"
+          >
+            Save
+          </button>
+          <button
+            mat-stroked-button
+            label="Cancel"
+            (click)="cd.reject()"
+            class="p-button-outlined w-8rem"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
