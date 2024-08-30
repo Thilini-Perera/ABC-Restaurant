@@ -289,7 +289,7 @@ namespace ABCResturant.Controllers
 
                     page.Margin(2, Unit.Centimetre);
                     page.PageColor(Colors.White);
-                    page.Header().Text($"Profit Report from the ABC Restuarant Chain").SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
+                    page.Header().Text($"Query Report from the ABC Restuarant Chain").SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
 
                     page.Content()
                     .PaddingVertical(1, Unit.Centimetre)
